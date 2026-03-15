@@ -23,7 +23,7 @@ gap = 9
 
 ball_color = (255, 255, 255)
 ball_size = 15
-ball_speed = 1
+ball_speed = 5
 
 spawn_area = 100 #The ball can spawn everywhere 100 pixels from the center of the screen
 
@@ -71,6 +71,10 @@ def draw(player1, player2):
 def main():
     running = 1
 
+    global ball
+    global ball_vel_x
+    global ball_vel_y
+
     #Drawing the players
     p1 = pygame.Rect(player_width * 2, p1y, player_width, player_height)
     p2 = pygame.Rect(WIDTH - player_width * 3, p2y, player_width, player_height)
@@ -104,6 +108,23 @@ def main():
         # Ball movement
         ball.x += ball_vel_x
         ball.y += ball_vel_y
+
+        # Ball collision with top and bottom walls
+        if ball.top <= 0 or ball.bottom >= HEIGHT:
+            ball_vel_y *= -1
+        
+        # Ball collision with players
+        if ball.colliderect(p1) or ball.colliderect(p2):
+            ball_vel_x *= -1
+
+        if ball.colliderect(p1):
+            ball.left = p1.right
+            ball_vel_x *= -1
+
+        if ball.colliderect(p2):
+            ball.right = p2.left
+            ball_vel_x *= -1
+         
 
         draw(p1, p2)
 
