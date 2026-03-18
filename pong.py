@@ -3,6 +3,9 @@ import sys
 import random
 import time
 
+pygame.font.init()
+
+FONT = pygame.font.SysFont("Arial", 40)
 
 HEIGHT = 600
 WIDTH = 800
@@ -10,7 +13,7 @@ WIDTH = 800
 player_height = 70
 player_width = 15
 player_color = (255, 255, 255)
-player_velocity = 15
+player_velocity = 12
 
 p1y = HEIGHT / 2 - player_height / 2
 p2y = HEIGHT / 2 - player_height / 2
@@ -23,9 +26,9 @@ gap = 9
 
 ball_color = (255, 255, 255)
 ball_size = 15
-ball_speed = 5
+ball_speed = 3
 
-spawn_area = 100 #The ball can spawn everywhere 100 pixels from the center of the screen
+spawn_area = 40 #The ball can spawn everywhere 100 pixels from the center of the screen
 
 spawn_x = random.randint(WIDTH // 2 - spawn_area // 2, WIDTH // 2 + spawn_area // 2)
 spawn_y = random.randint(HEIGHT // 2 - spawn_area // 2, HEIGHT // 2 + spawn_area // 2)
@@ -37,8 +40,8 @@ ball_direction = random.choice([-1, 1]) # -1 left, 1 right
 ball_vel_x = ball_direction * ball_speed
 ball_vel_y = random.choice([-1, 1]) * ball_speed
 
-
-
+score1 = 0
+score2 = 0
 
 
 # Initializes the game screen
@@ -49,9 +52,17 @@ pygame.display.set_caption("pong clone")
 pygame.display.flip()
 
 #Draws everything on the SCREEN
-def draw(player1, player2):
+def draw(player1, player2, score1, score2):
     SCREEN.fill(background_color)
 
+    # Draws the score board
+    score1_text = FONT.render(str(score1), True, (255, 255, 255))
+    score2_text = FONT.render(str(score2), True, (255, 255, 255))
+
+    SCREEN.blit(score1_text, (WIDTH // 4, 20))
+    SCREEN.blit(score2_text, (WIDTH * 3 // 4, 20))
+
+    # Draws the players
     pygame.draw.rect(SCREEN, player_color, player1)
     pygame.draw.rect(SCREEN, player_color, player2)
 
@@ -74,6 +85,9 @@ def main():
     global ball
     global ball_vel_x
     global ball_vel_y
+
+    global score1
+    global score2
 
     #Drawing the players
     p1 = pygame.Rect(player_width * 2, p1y, player_width, player_height)
@@ -117,16 +131,22 @@ def main():
         if ball.colliderect(p1) or ball.colliderect(p2):
             ball_vel_x *= -1
 
-        if ball.colliderect(p1):
-            ball.left = p1.right
-            ball_vel_x *= -1
+        # Scores controls
+        if ball.left <= 0:
+            score2 += 1
 
-        if ball.colliderect(p2):
-            ball.right = p2.left
-            ball_vel_x *= -1
-         
+        if ball.right >= WIDTH:
+            score1 += 1
 
-        draw(p1, p2)
+        # Resets the ball to the center after scoring
+        if ball.left <= 0 or ball.right >= WIDTH:
+            ball.x = WIDTH // 2
+            ball.y = HEIGHT // 2
+
+            ball_vel_x *= random.choice([-1, 1])
+            ball_vel_y *= random.choice([-1, 1])
+        
+        draw(p1, p2, score1, score2)
 
     pygame.quit()
     sys.exit()
