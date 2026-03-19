@@ -5,7 +5,7 @@ import time
 
 pygame.font.init()
 
-FONT = pygame.font.SysFont("Arial", 40)
+FONT = pygame.font.Font("PressStart2p-Regular.ttf", 40)
 
 HEIGHT = 600
 WIDTH = 800
@@ -13,7 +13,7 @@ WIDTH = 800
 player_height = 70
 player_width = 15
 player_color = (255, 255, 255)
-player_velocity = 12
+player_velocity = 15
 
 p1y = HEIGHT / 2 - player_height / 2
 p2y = HEIGHT / 2 - player_height / 2
@@ -22,13 +22,13 @@ background_color = (0, 0, 0)
 
 net_width = 6
 net_height = 20
-gap = 9
+net_gap = 9
 
 ball_color = (255, 255, 255)
 ball_size = 15
-ball_speed = 3
+ball_speed = 7
 
-spawn_area = 40 #The ball can spawn everywhere 100 pixels from the center of the screen
+spawn_area = 30 #The ball can spawn everywhere 30 pixels from the center of the screen
 
 spawn_x = random.randint(WIDTH // 2 - spawn_area // 2, WIDTH // 2 + spawn_area // 2)
 spawn_y = random.randint(HEIGHT // 2 - spawn_area // 2, HEIGHT // 2 + spawn_area // 2)
@@ -68,7 +68,7 @@ def draw(player1, player2, score1, score2):
 
     
     # Drawing the net
-    for y in range(0, HEIGHT, net_height + gap):
+    for y in range(0, HEIGHT, net_height + net_gap):
         pygame.draw.rect(SCREEN, (255, 255, 255), (WIDTH / 2 - net_width / 2, y, net_width, net_height))
 
     #Drawing the ball
@@ -128,20 +128,29 @@ def main():
             ball_vel_y *= -1
         
         # Ball collision with players
-        if ball.colliderect(p1) or ball.colliderect(p2):
+        if ball.colliderect(p1):
             ball_vel_x *= -1
+            ball.x = p1.right
+        
+        if ball.colliderect(p2):
+            ball_vel_x *= -1
+            ball.x = p2.left - ball_size
 
         # Scores controls
         if ball.left <= 0:
             score2 += 1
+            if score2 == 10:
+                running = 0
 
         if ball.right >= WIDTH:
             score1 += 1
+            if score1 == 10:
+                running = 0
 
         # Resets the ball to the center after scoring
         if ball.left <= 0 or ball.right >= WIDTH:
-            ball.x = WIDTH // 2
-            ball.y = HEIGHT // 2
+            ball.x = spawn_x
+            ball.y = spawn_y
 
             ball_vel_x *= random.choice([-1, 1])
             ball_vel_y *= random.choice([-1, 1])
