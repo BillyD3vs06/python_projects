@@ -1,7 +1,7 @@
 import pygame
 import sys
 import random
-import time
+
 
 pygame.font.init()
 
@@ -26,18 +26,19 @@ net_gap = 9
 
 ball_color = (255, 255, 255)
 ball_size = 15
-ball_speed = 7
+ball_speed = 5
 
-spawn_area = 30 #The ball can spawn everywhere 30 pixels from the center of the screen
+original_ball_speed = ball_speed
+
+spawn_area = 10 #The ball can spawn everywhere 10 pixels from the center of the screen
 
 spawn_x = random.randint(WIDTH // 2 - spawn_area // 2, WIDTH // 2 + spawn_area // 2)
 spawn_y = random.randint(HEIGHT // 2 - spawn_area // 2, HEIGHT // 2 + spawn_area // 2)
 
 ball = pygame.Rect(spawn_x, spawn_y, ball_size, ball_size)
 
-ball_direction = random.choice([-1, 1]) # -1 left, 1 right
 
-ball_vel_x = ball_direction * ball_speed
+ball_vel_x = random.choice([-1, 1]) * ball_speed
 ball_vel_y = random.choice([-1, 1]) * ball_speed
 
 score1 = 0
@@ -78,6 +79,16 @@ def draw(player1, player2, score1, score2):
     pygame.display.flip()
     pygame.display.update()
 
+# Resets the ball's speed
+def reset_ball_speed(speed):
+
+    global ball_vel_x
+    global ball_vel_y
+
+    ball_vel_x = (ball_vel_x / abs(ball_vel_x)) * speed
+    ball_vel_y = (ball_vel_y / abs(ball_vel_y)) * speed
+
+
 #Starts the game loop
 def main():
     running = 1
@@ -88,6 +99,10 @@ def main():
 
     global score1
     global score2
+
+    global ball_speed
+
+    ball_speed_increment = 0.5
 
     #Drawing the players
     p1 = pygame.Rect(player_width * 2, p1y, player_width, player_height)
@@ -131,19 +146,31 @@ def main():
         if ball.colliderect(p1):
             ball_vel_x *= -1
             ball.x = p1.right
-        
+            ball_speed += ball_speed_increment
+
+            reset_ball_speed(ball_speed)
+
         if ball.colliderect(p2):
             ball_vel_x *= -1
             ball.x = p2.left - ball_size
+            ball_speed += ball_speed_increment
+
+            reset_ball_speed(ball_speed)
 
         # Scores controls
         if ball.left <= 0:
             score2 += 1
+            reset_ball_speed(original_ball_speed)
+            ball_speed = original_ball_speed
+
             if score2 == 10:
                 running = 0
 
         if ball.right >= WIDTH:
             score1 += 1
+            reset_ball_speed(original_ball_speed)
+            ball_speed = original_ball_speed
+
             if score1 == 10:
                 running = 0
 
